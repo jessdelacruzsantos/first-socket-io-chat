@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat-example</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      *:focus {outline: none;}
+      body {font: 13px Helvetica, Arial;height: 680px;background: rgb(0, 0, 0);}
+      form { background: rgb(190, 189, 189); padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; border-radius: 8px; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(40, 219, 70); border: none;border-radius: 8px; padding: 10px; }
+      #messages { border-radius: 8px; list-style-type: none; margin: 0; padding: 0;  }
+      #messages li { border-radius: 8px; padding: 5px 10px; word-wrap: break-word; margin: 10px; max-width: 30%;clear:both;padding-bottom: 15px;}
+      /* #messages li:nth-child(odd) { background: #eee; } */
+      #User-Name-Prompt {align-self:center;font-family: cursive; text-align: center; background: black;display: block; padding: 20px; margin: 0% 20%;position: relative; top: 220px;}
+      #name-input {text-align: center; color: rgb(202, 24, 24); background: black; border:none; border-bottom: 1px solid white;font-size: 60px;margin: 20px 0px; width: 100%;}
+      .hide {display: none}
+      .shadow {box-shadow: 0px 5px 5px 0px #888888;}
+      .out-put {color: white; background: rgb(75, 75, 230);float:right;}
+      .recieved {color:black;background:rgb(190, 189, 189);float: left;}
+    </style>
+
+  </head>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="https://code.jquery.com/color/jquery.color-2.1.2.js"
+  integrity="sha256-1Cn7TdfHiMcEbTuku97ZRSGt2b3SvZftEIn68UMgHC8="
+  crossorigin="anonymous"></script>
+  
+  <script>
+    $(function () {
+      var socket = io();
+      $('form').submit(function(){
+        var msg = $('#m').val();
+
+        $('#m').val('');
+        $('#messages').append($('<li >').text('Me: ' + msg).addClass('out-put'));
+
+        socket.emit('chat message', (msg));
+        
+        return false;
+      });
+      $('#name-input').keyup(function(event){
+
+        if (event.which === 13) {
+          let name = $('#name-input').val();
+          $('#name-input').val('');
+
+          socket.emit('name-input', name);
+
+          $("#User-Name-Prompt").fadeOut('slow');
+          $("#app").fadeIn('slow');
+          $('body').animate({backgroundColor: 'white'}, 'slow');
+        }
+        
+        return false;
+      });
+      socket.on('chat message', function(msg, id){
+        if (socket.id !== id) {
+          $('#messages').append($('<li >').text(msg).addClass('recieved'));
+        }
+      });
+    });
+  </script>
+
+  <body>
+    <div id="User-Name-Prompt">
+      <h1 style="color: white; font-size: 32px;">Make a username: </h1>
+      <input id="name-input" autocomplete="off"/>
+    </div>
+    <div id ="app" class="hide">
+      <ul id="messages"></ul>
+      <form action="">
+        <input class="shadow"id="m" autocomplete="off" placeholder="Start Typing Your Messages!" /><button class="shadow">Send</button>
+      </form>
+    </div>
+  </body>
+</html>
